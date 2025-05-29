@@ -46,6 +46,7 @@ func (m TabModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	numtabs := len(m.Tabs)
 
 	switch msg := msg.(type) {
+
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
@@ -64,7 +65,12 @@ func (m TabModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
+func tabBorderWithBottom(_border string) lipgloss.Border {
+	split := strings.Split(_border, "")
+
+	left := split[0]
+	middle := split[1]
+	right := split[2]
 	border := lipgloss.RoundedBorder()
 	border.BottomLeft = left
 	border.Bottom = middle
@@ -73,8 +79,8 @@ func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
 }
 
 var (
-	inactiveTabBorder = tabBorderWithBottom("┴", "─", "┴")
-	activeTabBorder   = tabBorderWithBottom("┘", " ", "└")
+	inactiveTabBorder = tabBorderWithBottom("┴─┴")
+	activeTabBorder   = tabBorderWithBottom("┘ └")
 	docStyle          = lipgloss.NewStyle().Padding(0, 0, 0, 0)
 	highlightColor    = lipgloss.AdaptiveColor{Light: colors.Purple, Dark: colors.DarkPurple}
 
@@ -126,10 +132,6 @@ func (m TabModel) View() string {
 
 	doc.WriteString(row)
 	doc.WriteString("\n")
-
-	// doc.WriteString(windowStyle.Width((lipgloss.Width(row) - windowStyle.GetHorizontalFrameSize())).Render(m.TabContent[m.ActiveTab]))
-
-	// docWidth := lipgloss.Width(row) - windowStyle.GetHorizontalFrameSize()
 
 	docString := windowStyle.Width(width).Height(height).Render(m.TabContent[m.ActiveTab])
 

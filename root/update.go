@@ -9,6 +9,12 @@ import (
 	"github.com/charmbracelet/huh"
 )
 
+const (
+	sectionPanel = 0
+	titlesPanel  = 1
+	descPanel    = 2
+)
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Handle form mode first - don't let other components process keys
 	cmds := make([]tea.Cmd, 0)
@@ -38,28 +44,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	tabsModel, cmd := m.Tabs.Update(msg)
 	cmds = append(cmds, cmd)
 
-	ideaTextAreaModel, cmd := m.IdeaManager.TextArea.Update(msg)
-	cmds = append(cmds, cmd)
-
-	if m.activePanel == 1 {
-		ideaTextAreaModel.Focus()
-	} else {
-		ideaTextAreaModel.Blur()
-		listModel, cmd := m.IdeaManager.List.Update(msg)
+	switch m.Tabs.ActiveTab {
+	case 0:
+		ideaViewportModel, cmd := m.IdeaManager.Viewport.Update(msg)
 		cmds = append(cmds, cmd)
-		m.IdeaManager.List = listModel
-	}
-
-	activeItem := m.IdeaManager.List.Items()[m.IdeaManager.List.Index()]
-	if a, ok := activeItem.(Idea); ok {
-		if m.activePanel == 0 {
-			ideaTextAreaModel.SetValue(a.Description())
+		m.IdeaManager.Viewport = ideaViewportModel
+		if m.activePanel == titlesPanel {
+			listModel, cmd := m.IdeaManager.List.Update(msg)
+			cmds = append(cmds, cmd)
+			m.IdeaManager.List = listModel
+		}
+	case 2:
+		bookViewportModel, cmd := m.BookManager.Viewport.Update(msg)
+		cmds = append(cmds, cmd)
+		m.BookManager.Viewport = bookViewportModel
+		if m.activePanel == titlesPanel {
+			listModel, cmd := m.BookManager.List.Update(msg)
+			cmds = append(cmds, cmd)
+			m.BookManager.List = listModel
+		}
+	case 1:
+		projectViewportModel, cmd := m.ProjectManager.Viewport.Update(msg)
+		cmds = append(cmds, cmd)
+		m.ProjectManager.Viewport = projectViewportModel
+		if m.activePanel == titlesPanel {
+			listModel, cmd := m.ProjectManager.List.Update(msg)
+			cmds = append(cmds, cmd)
+			m.ProjectManager.List = listModel
 		}
 	}
 
 	m.Tabs = tabsModel.(components.TabModel)
-
-	m.IdeaManager.TextArea = ideaTextAreaModel
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -68,19 +83,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		m.Tabs.Update(msg)
-		isValid := m.mode == Read &&
+		isFilterNotInFocus := m.mode == Read &&
 			m.IdeaManager.List.FilterState() != list.Filtering &&
 			m.BookManager.List.FilterState() != list.Filtering
+
 		switch {
+		case key.Matches(msg, m.keys.Down):
+			n := len(m.Tabs.Tabs)
+			if m.activePanel == 0 && m.mode == Read {
+				m.Tabs.ActiveTab = (m.Tabs.ActiveTab + 1) % n
+			}
+
 		case key.Matches(msg, m.keys.Up):
-			if m.mode == Read {
-				if m.cursor > 0 {
-					m.cursor--
+			n := len(m.Tabs.Tabs)
+			if m.activePanel == 0 && m.mode == Read {
+				if m.Tabs.ActiveTab == 0 {
+					m.Tabs.ActiveTab = n - 1
+				} else {
+					m.Tabs.ActiveTab = (m.Tabs.ActiveTab - 1)
 				}
 			}
 
 		case key.Matches(msg, m.keys.DeleteItem):
-			if m.mode == Read && m.activePanel == 0 {
+			if m.mode == Read && m.activePanel == titlesPanel && isFilterNotInFocus {
 				switch m.Tabs.ActiveTab {
 				case 0:
 					i := m.IdeaManager.List.Index()
@@ -98,9 +123,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.help.ShowAll = !m.help.ShowAll
 			}
 
-		case key.Matches(msg, m.keys.AddMode) && m.activePanel == 0:
-
-			if isValid {
+		case key.Matches(msg, m.keys.AddMode) && m.activePanel == titlesPanel:
+			if isFilterNotInFocus {
 				m.mode = Write
 				switch m.Tabs.ActiveTab {
 				case 0:
@@ -124,19 +148,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.ReadMode):
 			m.mode = Read
-			m.activePanel = 0
+			m.activePanel = 1
 			return m, nil
 
-		case key.Matches(msg, m.keys.PrevPanel) || key.Matches(msg, m.keys.NextPanel):
-			if m.activePanel == 1 {
-				m.activePanel = 0
+		case key.Matches(msg, m.keys.NextPanel):
+			m.activePanel = (m.activePanel + 1) % m.n_panels
+
+		case key.Matches(msg, m.keys.PrevPanel):
+			if m.activePanel == 0 {
+				m.activePanel = 2
 			} else {
-				m.activePanel = 1
+				m.activePanel -= 1
 			}
 
-		case key.Matches(msg, m.keys.Quit) && m.activePanel == 0:
-			// quit
-			if isValid {
+		case key.Matches(msg, m.keys.Quit):
+			if isFilterNotInFocus {
 				m.quitting = true
 				if m.IsTouched {
 					save := false
@@ -155,7 +181,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		}
-
 	}
 
 	return m, tea.Batch(cmds...)

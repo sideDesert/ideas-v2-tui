@@ -61,20 +61,20 @@ var Keys = KeyMap{
 		key.WithHelp("enter", "toggle done"),
 	),
 	NextTab: key.NewBinding(
-		key.WithKeys("L", "ctrl+tab"),
-		key.WithHelp("shift+l", "Shift to right tab"),
+		key.WithKeys("J", "ctrl+tab"),
+		key.WithHelp("shift+j", "Shift to right tab"),
 	),
 	PrevTab: key.NewBinding(
-		key.WithKeys("H", "ctrl+shift+tab"),
-		key.WithHelp("shift+h", "Shift to left tab"),
+		key.WithKeys("K", "ctrl+shift+tab"),
+		key.WithHelp("shift+k", "Shift to left tab"),
 	),
 	NextPanel: key.NewBinding(
-		key.WithKeys("ctrl+l"),
-		key.WithHelp("ctrl+l", "Shift to right tab"),
+		key.WithKeys("L"),
+		key.WithHelp("shift+l", "Shift to right tab"),
 	),
 	PrevPanel: key.NewBinding(
-		key.WithKeys("ctrl+h"),
-		key.WithHelp("ctrl+h", "Shift to left tab"),
+		key.WithKeys("H"),
+		key.WithHelp("shift+h", "Shift to left tab"),
 	),
 	AddMode: key.NewBinding(
 		key.WithKeys("a", "i", "A", "I"),

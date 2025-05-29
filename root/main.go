@@ -10,7 +10,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -23,7 +23,6 @@ func InitialModel() model {
 		"Ideas",
 		"Projects",
 		"Books",
-		"Debugger",
 	}
 	inputStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(colors.Pink))
 	titleStyle := lipgloss.NewStyle().
@@ -48,23 +47,24 @@ func InitialModel() model {
 	for _, i := range ideas {
 		items = append(items, i)
 	}
-	ideasList := NewList(items, "Title", titleStyle)
+	ideasList := NewList(items)
 
 	items = []list.Item{}
 	for _, i := range books {
 		items = append(items, i)
 	}
-	booksList := NewList(items, "Books", titleStyle)
+	booksList := NewList(items)
 
 	items = []list.Item{}
 	for _, i := range projects {
 		items = append(items, i)
 	}
-	projectsList := NewList(items, "Projects", titleStyle)
+	projectsList := NewList(items)
 
 	m := model{
 		keys:      keymap.Keys,
 		IsTouched: false,
+		n_panels:  3,
 		help:      help.New(),
 		theme: Theme{
 			inputStyle: inputStyle,
@@ -74,16 +74,16 @@ func InitialModel() model {
 		IdeaManager: IdeaManager{
 			List:     ideasList,
 			Form:     NewIdeasForm(),
-			TextArea: textarea.New(),
+			Viewport: viewport.New(0, 0),
 		},
 		ProjectManager: ProjectManager{
 			List:     projectsList,
-			TextArea: textarea.New(),
+			Viewport: viewport.New(0, 0),
 		},
 		BookManager: BookManager{
 			List:     booksList,
 			Form:     NewBooksForm(),
-			TextArea: textarea.New(),
+			Viewport: viewport.New(0, 0),
 		},
 	}
 
@@ -99,6 +99,9 @@ func (m model) Init() tea.Cmd {
 	cmds = append(cmds, cmd)
 
 	cmd = m.BookManager.Form.Init()
+	cmds = append(cmds, cmd)
+
+	cmd = m.IdeaManager.Viewport.Init()
 	cmds = append(cmds, cmd)
 
 	return tea.Batch(cmds...)

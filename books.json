@@ -1,6 +1,10 @@
 [
  {
   "title": "OSTEP",
-  "description": "Operating System Three Easy Pieces"
+  "description": "# OSTEP A book about operating systems\n I like OSTEP"
+ },
+ {
+  "title": "Concurrency in Go",
+  "description": "A book to learn about concurrency in GO!!"
  }
 ]

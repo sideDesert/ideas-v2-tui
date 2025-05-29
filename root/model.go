@@ -6,7 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -74,24 +74,25 @@ type Theme struct {
 
 type IdeaManager struct {
 	List     list.Model
-	TextArea textarea.Model
+	Viewport viewport.Model
 	Form     *huh.Form
 }
 
 type ProjectManager struct {
 	List     list.Model
-	TextArea textarea.Model
+	Viewport viewport.Model
 	Form     *huh.Form
 }
 
 type BookManager struct {
 	List     list.Model
-	TextArea textarea.Model
+	Viewport viewport.Model
 	Form     *huh.Form
 }
 
 type model struct {
 	IsTouched      bool
+	n_panels       int
 	Tabs           components.TabModel
 	IdeaManager    IdeaManager
 	ProjectManager ProjectManager
