@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type Idea struct {
@@ -67,27 +66,25 @@ type Tab struct {
 	panels []Panel
 }
 
-type Theme struct {
-	inputStyle lipgloss.Style
-	titleStyle lipgloss.Style
-}
-
 type IdeaManager struct {
-	List     list.Model
-	Viewport viewport.Model
-	Form     *huh.Form
+	List         list.Model
+	ListDelegate list.DefaultDelegate
+	Viewport     viewport.Model
+	Form         *huh.Form
 }
 
 type ProjectManager struct {
-	List     list.Model
-	Viewport viewport.Model
-	Form     *huh.Form
+	List         list.Model
+	ListDelegate list.DefaultDelegate
+	Viewport     viewport.Model
+	Form         *huh.Form
 }
 
 type BookManager struct {
-	List     list.Model
-	Viewport viewport.Model
-	Form     *huh.Form
+	List         list.Model
+	ListDelegate list.DefaultDelegate
+	Viewport     viewport.Model
+	Form         *huh.Form
 }
 
 type model struct {

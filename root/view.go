@@ -108,10 +108,37 @@ func (m model) View() string {
 		switch m.activePanel {
 		case 0:
 			sectionTitleStyle = activeTitleStyle
+			m.IdeaManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+			m.IdeaManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+			m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+			m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+
+			m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+			m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+			m.BookManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+			m.BookManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
 		case 1:
 			titlesTitleStyle = activeTitleStyle
+			m.IdeaManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+			m.IdeaManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+			m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.normalTitle
+			m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.normalDesc
+
+			m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+			m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+			m.BookManager.ListDelegate.Styles.NormalTitle = m.theme.list.normalTitle
+			m.BookManager.ListDelegate.Styles.NormalDesc = m.theme.list.normalDesc
 		case 2:
 			descriptionTitleStyle = activeTitleStyle
+			m.IdeaManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+			m.IdeaManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+			m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+			m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+
+			m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+			m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+			m.BookManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+			m.BookManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
 		}
 
 		sectionTitleStyle = sectionTitleStyle.Width(sectionPanelWidth).Height(1)
@@ -134,6 +161,7 @@ func (m model) View() string {
 				}
 				viewportView.SetContent(out)
 			}
+			listView.SetDelegate(m.IdeaManager.ListDelegate)
 		case 1:
 			listView = m.ProjectManager.List
 			viewportView = m.ProjectManager.Viewport
@@ -148,6 +176,7 @@ func (m model) View() string {
 				}
 				viewportView.SetContent(out)
 			}
+			listView.SetDelegate(m.BookManager.ListDelegate)
 		}
 
 		listView.SetHeight(tabContentHeight)

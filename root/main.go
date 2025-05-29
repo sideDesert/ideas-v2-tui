@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 
-	"sideDesert/ideasv2/colors"
 	"sideDesert/ideasv2/components"
 	"sideDesert/ideasv2/keymap"
 
@@ -12,7 +11,6 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 // Change this
@@ -24,13 +22,6 @@ func InitialModel() model {
 		"Projects",
 		"Books",
 	}
-	inputStyle := lipgloss.NewStyle().Foreground(lipgloss.Color(colors.Pink))
-	titleStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color(colors.Black)).
-		Background(lipgloss.Color(colors.DarkGreen)).
-		PaddingTop(0).
-		Padding(0, 4)
 
 	var ideas []Idea
 	var books []Book
@@ -47,43 +38,46 @@ func InitialModel() model {
 	for _, i := range ideas {
 		items = append(items, i)
 	}
-	ideasList := NewList(items)
+	ideaDelegate := list.NewDefaultDelegate()
+	ideasList := NewList(items, ideaDelegate)
 
 	items = []list.Item{}
 	for _, i := range books {
 		items = append(items, i)
 	}
-	booksList := NewList(items)
+	bookDelegate := list.NewDefaultDelegate()
+	booksList := NewList(items, bookDelegate)
 
 	items = []list.Item{}
 	for _, i := range projects {
 		items = append(items, i)
 	}
-	projectsList := NewList(items)
+	projectDelegate := list.NewDefaultDelegate()
+	projectsList := NewList(items, projectDelegate)
 
 	m := model{
 		keys:      keymap.Keys,
 		IsTouched: false,
 		n_panels:  3,
 		help:      help.New(),
-		theme: Theme{
-			inputStyle: inputStyle,
-			titleStyle: titleStyle,
-		},
-		Tabs: components.NewTabModel(tabs, []string{"", ""}, 0),
+		theme:     DefaultTheme(),
+		Tabs:      components.NewTabModel(tabs, []string{"", ""}, 0),
 		IdeaManager: IdeaManager{
-			List:     ideasList,
-			Form:     NewIdeasForm(),
-			Viewport: viewport.New(0, 0),
+			List:         ideasList,
+			ListDelegate: ideaDelegate,
+			Form:         NewIdeasForm(),
+			Viewport:     viewport.New(0, 0),
 		},
 		ProjectManager: ProjectManager{
-			List:     projectsList,
-			Viewport: viewport.New(0, 0),
+			List:         projectsList,
+			ListDelegate: projectDelegate,
+			Viewport:     viewport.New(0, 0),
 		},
 		BookManager: BookManager{
-			List:     booksList,
-			Form:     NewBooksForm(),
-			Viewport: viewport.New(0, 0),
+			List:         booksList,
+			ListDelegate: bookDelegate,
+			Form:         NewBooksForm(),
+			Viewport:     viewport.New(0, 0),
 		},
 	}
 
