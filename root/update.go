@@ -24,7 +24,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		switch m.Tabs.ActiveTab {
 		// Handle IDEA form updates
-		case 0:
+		case ideasTab:
 			cmd, state := m.IdeaManager.HandleUpdateForm(msg)
 			if state == SaveAndExit {
 				m.SaveFiles()
@@ -36,8 +36,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			cmds = append(cmds, cmd)
 		// Handle Project form updates
-		case 1:
-			cmd, state := m.BookManager.HandleUpdateForm(msg)
+		case projectsTab:
+			cmd, state := m.ProjectManager.HandleUpdateForm(msg)
 			if state == SaveAndExit {
 				m.SaveFiles()
 				m.mode = Read
@@ -48,7 +48,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 
 		// Handle Book form updates
-		case 2:
+		case booksTab:
 			cmd, state := m.BookManager.HandleUpdateForm(msg)
 			if state == SaveAndExit {
 				m.SaveFiles()

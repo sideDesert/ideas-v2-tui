@@ -93,13 +93,16 @@ func (m model) Init() tea.Cmd {
 	cmd := m.Tabs.Init()
 	cmds = append(cmds, cmd)
 
-	cmd = m.IdeaManager.Form.Init()
-	cmds = append(cmds, cmd)
+	icmds := m.IdeaManager.Init()
+	cmds = append(cmds, icmds...)
+
+	icmds = m.BookManager.Init()
+	cmds = append(cmds, icmds...)
+
+	icmds = m.ProjectManager.Init()
+	cmds = append(cmds, icmds...)
 
 	cmd = m.BookManager.Form.Init()
-	cmds = append(cmds, cmd)
-
-	cmd = m.IdeaManager.Viewport.Init()
 	cmds = append(cmds, cmd)
 
 	return tea.Batch(cmds...)

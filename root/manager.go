@@ -51,3 +51,14 @@ func (m *Manager) HandleUpdateForm(msg tea.Msg) (tea.Cmd, int) {
 
 	return cmd, state
 }
+
+func (m Manager) Init() []tea.Cmd {
+	cmds := make([]tea.Cmd, 0)
+	cmd := m.Viewport.Init()
+	cmds = append(cmds, cmd)
+
+	cmd = m.Form.Init()
+	cmds = append(cmds, cmd)
+
+	return cmds
+}

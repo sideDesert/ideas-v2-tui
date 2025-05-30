@@ -37,13 +37,13 @@ func (m model) View() string {
 				MarginTop(8)
 
 			var form string
-			if m.Tabs.ActiveTab == 0 {
+			if m.Tabs.ActiveTab == ideasTab {
 				form = m.IdeaManager.Form.View()
 			}
-			if m.Tabs.ActiveTab == 1 {
+			if m.Tabs.ActiveTab == projectsTab {
 				form = m.ProjectManager.Form.View()
 			}
-			if m.Tabs.ActiveTab == 2 {
+			if m.Tabs.ActiveTab == booksTab {
 				form = m.BookManager.Form.View()
 			}
 
@@ -108,11 +108,11 @@ func (m model) View() string {
 
 		var activeMger *Manager
 		switch m.Tabs.ActiveTab {
-		case 0:
+		case ideasTab:
 			activeMger = &m.IdeaManager
-		case 1:
+		case projectsTab:
 			activeMger = &m.ProjectManager
-		case 2:
+		case booksTab:
 			activeMger = &m.BookManager
 		}
 
