@@ -1,0 +1,53 @@
+package root
+
+import (
+	"fmt"
+	"os"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/huh"
+)
+
+const (
+	NullState = iota
+	SaveAndExit
+	Exit
+)
+
+func (m *Manager) HandleUpdateForm(msg tea.Msg) (tea.Cmd, int) {
+	newForm, cmd := m.Form.Update(msg)
+	state := NullState
+	if form, ok := newForm.(*huh.Form); ok {
+		m.Form = form
+	} else {
+		fmt.Println("NO form updates")
+	}
+
+	// Check if form is completed
+	if m.Form.State == huh.StateCompleted {
+		title := m.Form.GetString("title")
+		desc := m.Form.GetString("desc")
+		confirm := m.Form.GetBool("confirm")
+
+		newIdea := Idea{
+			TitleText:       title,
+			DescriptionText: desc,
+		}
+
+		DEBUG := false
+		if DEBUG {
+			f, _ := os.OpenFile("debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			fmt.Fprintf(f, "DEBUG: title='%s', desc='%s', confirm=%v\n", title, desc, confirm)
+			f.Close()
+		}
+
+		if confirm {
+			m.List.InsertItem(len(m.List.Items()), newIdea)
+			state = SaveAndExit
+		} else {
+			state = Exit
+		}
+	}
+
+	return cmd, state
+}

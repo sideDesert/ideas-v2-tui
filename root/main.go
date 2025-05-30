@@ -62,18 +62,22 @@ func InitialModel() model {
 		help:      help.New(),
 		theme:     DefaultTheme(),
 		Tabs:      components.NewTabModel(tabs, []string{"", ""}, 0),
-		IdeaManager: IdeaManager{
+		IdeaManager: Manager{
+			tabIndex:     ideasTab,
 			List:         ideasList,
 			ListDelegate: ideaDelegate,
 			Form:         NewIdeasForm(),
 			Viewport:     viewport.New(0, 0),
 		},
-		ProjectManager: ProjectManager{
+		ProjectManager: Manager{
+			tabIndex:     projectsTab,
 			List:         projectsList,
 			ListDelegate: projectDelegate,
+			Form:         NewForm("New Project"),
 			Viewport:     viewport.New(0, 0),
 		},
-		BookManager: BookManager{
+		BookManager: Manager{
+			tabIndex:     booksTab,
 			List:         booksList,
 			ListDelegate: bookDelegate,
 			Form:         NewBooksForm(),

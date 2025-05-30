@@ -25,11 +25,38 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch m.Tabs.ActiveTab {
 		// Handle IDEA form updates
 		case 0:
-			cmd := m.HandleUpdateIdeaForm(msg)
+			cmd, state := m.IdeaManager.HandleUpdateForm(msg)
+			if state == SaveAndExit {
+				m.SaveFiles()
+				m.mode = Read
+			}
+			if state == Exit {
+				m.mode = Read
+			}
+
 			cmds = append(cmds, cmd)
+		// Handle Project form updates
+		case 1:
+			cmd, state := m.BookManager.HandleUpdateForm(msg)
+			if state == SaveAndExit {
+				m.SaveFiles()
+				m.mode = Read
+			}
+			if state == Exit {
+				m.mode = Read
+			}
+			cmds = append(cmds, cmd)
+
 		// Handle Book form updates
 		case 2:
-			cmd := m.HandleUpdateBookForm(msg)
+			cmd, state := m.BookManager.HandleUpdateForm(msg)
+			if state == SaveAndExit {
+				m.SaveFiles()
+				m.mode = Read
+			}
+			if state == Exit {
+				m.mode = Read
+			}
 			cmds = append(cmds, cmd)
 		}
 		return m, tea.Batch(cmds...)
@@ -62,15 +89,26 @@ func (m *model) updateStyles() {
 		m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
 		m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
 
+		m.ProjectManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.ProjectManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.ProjectManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+		m.ProjectManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+
 		m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
 		m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
 		m.BookManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
 		m.BookManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+
 	case 1:
 		m.IdeaManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
 		m.IdeaManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
 		m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.normalTitle
 		m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.normalDesc
+
+		m.ProjectManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.ProjectManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.ProjectManager.ListDelegate.Styles.NormalTitle = m.theme.list.normalTitle
+		m.ProjectManager.ListDelegate.Styles.NormalDesc = m.theme.list.normalDesc
 
 		m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
 		m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
@@ -81,6 +119,11 @@ func (m *model) updateStyles() {
 		m.IdeaManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
 		m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
 		m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+
+		m.ProjectManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.ProjectManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.ProjectManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+		m.ProjectManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
 
 		m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
 		m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc

@@ -66,21 +66,8 @@ type Tab struct {
 	panels []Panel
 }
 
-type IdeaManager struct {
-	List         list.Model
-	ListDelegate list.DefaultDelegate
-	Viewport     viewport.Model
-	Form         *huh.Form
-}
-
-type ProjectManager struct {
-	List         list.Model
-	ListDelegate list.DefaultDelegate
-	Viewport     viewport.Model
-	Form         *huh.Form
-}
-
-type BookManager struct {
+type Manager struct {
+	tabIndex     int
 	List         list.Model
 	ListDelegate list.DefaultDelegate
 	Viewport     viewport.Model
@@ -91,9 +78,9 @@ type model struct {
 	IsTouched      bool
 	n_panels       int
 	Tabs           components.TabModel
-	IdeaManager    IdeaManager
-	ProjectManager ProjectManager
-	BookManager    BookManager
+	IdeaManager    Manager
+	ProjectManager Manager
+	BookManager    Manager
 	mode           int
 	activePanel    int
 	cursor         int

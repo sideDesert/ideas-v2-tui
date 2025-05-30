@@ -75,6 +75,16 @@ Both are automatically updated as you use the app.
 - [Charmbracelet Huh](https://github.com/charmbracelet/huh)
 - [Charmbracelet Lip Gloss](https://github.com/charmbracelet/lipgloss)
 
+## TODO
+- [ ] Make Forms use up same width and height adjustments
+- [ ] Make Form for projects
+- [ ] Add Upgrade to project button
+- [ ] Move documents from using .JSON files to using
+- [ ] Add Command to Open Document in NVIM
+- [ ] Iterate on Project View design
+- [ ] Add keybind for moving items up and down
+- [ ] Add Line number and other beautification aspects to the markdown renderer
+- [ ] Replace huh with custom forms (I don't like how the keys are being handled)
 
 ---
 

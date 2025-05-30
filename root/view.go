@@ -15,22 +15,6 @@ var (
 )
 
 func (m model) View() string {
-	// var style = m.theme.titleStyle
-	// leftPanelWidth := 45
-	// rightPanelWidth := m.width - leftPanelWidth - 8
-
-	// title := style.Render("DEBUGGER")
-	// var status string
-
-	// helpView := m.help.View(m.keys)
-	// mode := get_mode(m.mode)
-
-	// helpMetaview := m.theme.inputStyle.Render(fmt.Sprintf("\nDEBUGGER: lpw %d w %d  h %d mode %s tab %d panel %d\n", leftPanelWidth, m.width, m.height, mode, m.Tabs.ActiveTab, m.activePanel))
-
-	// s := "What should we buy at the market?\n\n"
-
-	// contentStyle := lipgloss.NewStyle().
-	// 	Width(m.width)
 	marginTop := 1
 	footerHeight := 1
 	titleHeight := 1
@@ -38,6 +22,7 @@ func (m model) View() string {
 
 	sectionPanelWidth := m.width / 6
 	titlePanelWidth := (m.width - sectionPanelWidth) / 3
+	formWidth := m.width / 2
 	descPanelWidth := m.width - sectionPanelWidth - titlePanelWidth
 
 	switch m.mode {
@@ -46,23 +31,26 @@ func (m model) View() string {
 			// TODO Make this actually centered
 			centeredPanel := lipgloss.NewStyle().
 				Border(lipgloss.RoundedBorder()).
-				Width(60).
+				Width(formWidth).
 				Padding(1, 2).
-				MarginLeft(35).
+				MarginLeft((m.width - formWidth) / 2).
 				MarginTop(8)
 
 			var form string
 			if m.Tabs.ActiveTab == 0 {
 				form = m.IdeaManager.Form.View()
 			}
+			if m.Tabs.ActiveTab == 1 {
+				form = m.ProjectManager.Form.View()
+			}
 			if m.Tabs.ActiveTab == 2 {
 				form = m.BookManager.Form.View()
 			}
+
 			return centeredPanel.Render(form)
 		}
 
 	case Read, Edit:
-
 		var tabStyle = lipgloss.NewStyle().
 			Margin(0).
 			Padding(0)
@@ -118,16 +106,23 @@ func (m model) View() string {
 		titlesTitleStyle = titlesTitleStyle.Width(titlePanelWidth).Height(1)
 		descriptionTitleStyle = descriptionTitleStyle.Width(descPanelWidth).Height(1)
 
-		listView := m.BookManager.List
-		viewportView := m.BookManager.Viewport
-
+		var activeMger *Manager
 		switch m.Tabs.ActiveTab {
 		case 0:
-			im := m.IdeaManager
-			listView = im.List
-			viewportView = im.Viewport
-			activeItem := listView.Items()[m.IdeaManager.List.Index()]
-			if a, ok := activeItem.(Idea); ok {
+			activeMger = &m.IdeaManager
+		case 1:
+			activeMger = &m.ProjectManager
+		case 2:
+			activeMger = &m.BookManager
+		}
+
+		listView := &activeMger.List
+		viewportView := &activeMger.Viewport
+		activeIndex := activeMger.List.Index()
+
+		if len(listView.Items()) != 0 {
+			activeItem := &listView.Items()[activeIndex]
+			if a, ok := (*activeItem).(Idea); ok {
 				out, err := glamour.Render(a.Description(), "dark")
 				if err != nil {
 					tea.Println("Glamour Render error, ", err)
@@ -135,21 +130,6 @@ func (m model) View() string {
 				viewportView.SetContent(out)
 			}
 			listView.SetDelegate(m.IdeaManager.ListDelegate)
-		case 1:
-			listView = m.ProjectManager.List
-			viewportView = m.ProjectManager.Viewport
-		case 2:
-			listView = m.BookManager.List
-			viewportView = m.BookManager.Viewport
-			activeItem := listView.Items()[m.BookManager.List.Index()]
-			if a, ok := activeItem.(Book); ok {
-				out, err := glamour.Render(a.Description(), "dark")
-				if err != nil {
-					tea.Println("Glamour Render error, ", err)
-				}
-				viewportView.SetContent(out)
-			}
-			listView.SetDelegate(m.BookManager.ListDelegate)
 		}
 
 		listView.SetHeight(tabContentHeight)
