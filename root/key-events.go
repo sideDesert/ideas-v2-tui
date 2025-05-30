@@ -135,7 +135,9 @@ func (m model) handleKeyEvent(msg tea.Msg) (model, []tea.Cmd) {
 						Run()
 
 					if save {
-						m.SaveFiles()
+						m.IdeaManager.SaveLatestFile()
+						m.BookManager.SaveLatestFile()
+						m.ProjectManager.SaveLatestFile()
 					}
 				}
 				cmds = append(cmds, tea.Quit)

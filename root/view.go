@@ -1,7 +1,6 @@
 package root
 
 import (
-	"fmt"
 	"sideDesert/ideasv2/colors"
 	"strings"
 
@@ -17,13 +16,16 @@ var (
 func (m model) View() string {
 	marginTop := 1
 	footerHeight := 1
+	if m.help.ShowAll {
+		footerHeight = 4
+	}
 	titleHeight := 1
 	tabContentHeight := m.height - marginTop - footerHeight - titleHeight
 
-	sectionPanelWidth := m.width / 6
-	titlePanelWidth := (m.width - sectionPanelWidth) / 3
+	tabsPanelWidth := m.width / 6
+	titlePanelWidth := (m.width - tabsPanelWidth) / 3
 	formWidth := m.width / 2
-	descPanelWidth := m.width - sectionPanelWidth - titlePanelWidth
+	descPanelWidth := m.width - tabsPanelWidth - titlePanelWidth
 
 	switch m.mode {
 	case Write:
@@ -51,11 +53,11 @@ func (m model) View() string {
 		}
 
 	case Read, Edit:
-		var tabStyle = lipgloss.NewStyle().
-			Margin(0).
-			Padding(0)
+		// var tabStyle = lipgloss.NewStyle().
+		// 	Margin(0).
+		// 	Padding(0)
 
-		var footerStyle = lipgloss.NewStyle()
+		// var footerStyle = lipgloss.NewStyle()
 
 		var titleStyle = lipgloss.
 			NewStyle().
@@ -72,7 +74,7 @@ func (m model) View() string {
 
 		var contentStyle = lipgloss.NewStyle().Padding(1, 0, 0, 1)
 
-		var sectionTitleStyle = inactiveTitleStyle
+		var tabsTitleStyle = inactiveTitleStyle
 		var titlesTitleStyle = inactiveTitleStyle
 		var descriptionTitleStyle = inactiveTitleStyle
 
@@ -95,14 +97,14 @@ func (m model) View() string {
 
 		switch m.activePanel {
 		case 0:
-			sectionTitleStyle = activeTitleStyle
+			tabsTitleStyle = activeTitleStyle
 		case 1:
 			titlesTitleStyle = activeTitleStyle
 		case 2:
 			descriptionTitleStyle = activeTitleStyle
 		}
 
-		sectionTitleStyle = sectionTitleStyle.Width(sectionPanelWidth).Height(1)
+		tabsTitleStyle = tabsTitleStyle.Width(tabsPanelWidth).Height(1)
 		titlesTitleStyle = titlesTitleStyle.Width(titlePanelWidth).Height(1)
 		descriptionTitleStyle = descriptionTitleStyle.Width(descPanelWidth).Height(1)
 
@@ -143,10 +145,10 @@ func (m model) View() string {
 				lipgloss.Left,
 				lipgloss.JoinVertical(
 					lipgloss.Top,
-					sectionTitleStyle.
-						Render("Section"),
+					tabsTitleStyle.
+						Render("Tabs"),
 					contentStyle.
-						Width(sectionPanelWidth).
+						Width(tabsPanelWidth).
 						Height(tabContentHeight).
 						Render(tabsList.String()),
 				),
@@ -164,13 +166,15 @@ func (m model) View() string {
 				),
 			),
 
-			footerStyle.Render(tabStyle.
-				Width(m.width).
-				MarginTop(1).
-				Height(footerHeight).
-				Background(lipgloss.Color("60")).
-				PaddingLeft(1).
-				Render(fmt.Sprintf("STATUS  Active Panel: %d Mode: %s", m.activePanel, get_mode(m.mode)))),
+			m.help.View(m.keys),
+
+			// footerStyle.Render(tabStyle.
+			// 	Width(m.width).
+			// 	MarginTop(1).
+			// 	Height(footerHeight).
+			// 	Background(lipgloss.Color("60")).
+			// 	PaddingLeft(1).
+			// 	Render(fmt.Sprintf("STATUS  Active Panel: %d Mode: %s", m.activePanel, get_mode(m.mode)))),
 		)
 
 	}

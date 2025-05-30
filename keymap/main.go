@@ -3,32 +3,39 @@ package keymap
 import "github.com/charmbracelet/bubbles/key"
 
 type KeyMap struct {
-	Up         key.Binding
-	Down       key.Binding
-	Left       key.Binding
-	Right      key.Binding
-	Help       key.Binding
-	Quit       key.Binding
-	Submit     key.Binding
-	NextTab    key.Binding
-	PrevTab    key.Binding
-	NextPanel  key.Binding
-	PrevPanel  key.Binding
+	Up    key.Binding
+	Down  key.Binding
+	Left  key.Binding
+	Right key.Binding
+
+	NextTab   key.Binding
+	PrevTab   key.Binding
+	NextPanel key.Binding
+	PrevPanel key.Binding
+
+	AddMode  key.Binding
+	ReadMode key.Binding
+	EditMode key.Binding
+
 	DeleteItem key.Binding
-	AddMode    key.Binding
-	ReadMode   key.Binding
-	EditMode   key.Binding
+	RenameItem key.Binding
+	EditItem   key.Binding
+
+	Help   key.Binding
+	Submit key.Binding
+	Quit   key.Binding
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down, k.Left, k.Right}, // first column
 		{k.Help, k.Quit, k.Submit},      // second column
-		{k.NextTab, k.NextPanel},
+		{k.DeleteItem, k.RenameItem, k.EditItem, k.PrevPanel},
+		{k.NextTab, k.PrevTab, k.NextPanel, k.PrevPanel},
 	}
 }
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Help, k.Quit}
+	return []key.Binding{k.Quit, k.Help, k.Up, k.Down, k.NextPanel, k.PrevPanel}
 }
 
 var Keys = KeyMap{

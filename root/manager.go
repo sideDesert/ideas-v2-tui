@@ -2,6 +2,7 @@ package root
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -29,8 +30,11 @@ func (m *Manager) HandleUpdateForm(msg tea.Msg) (tea.Cmd, int) {
 		desc := m.Form.GetString("desc")
 		confirm := m.Form.GetBool("confirm")
 
-		newIdea := Idea{
+		tryFp := getUniqueFileName(m.DirPath, title, "md")
+
+		newListItem := ListItem{
 			TitleText:       title,
+			FilePath:        tryFp,
 			DescriptionText: desc,
 		}
 
@@ -42,7 +46,7 @@ func (m *Manager) HandleUpdateForm(msg tea.Msg) (tea.Cmd, int) {
 		}
 
 		if confirm {
-			m.List.InsertItem(len(m.List.Items()), newIdea)
+			m.List.InsertItem(len(m.List.Items()), newListItem)
 			state = SaveAndExit
 		} else {
 			state = Exit
@@ -61,4 +65,18 @@ func (m Manager) Init() []tea.Cmd {
 	cmds = append(cmds, cmd)
 
 	return cmds
+}
+
+func (m *Manager) SaveLatestFile() {
+	listItems := m.List.Items()
+	if len(listItems) != 0 {
+		if listItem, ok := listItems[len(listItems)-1].(ListItem); ok {
+			fp := listItem.FilePath
+			data := []byte(listItem.Description())
+			err := os.WriteFile(fp, data, 0664)
+			if err != nil {
+				log.Println("Error [*Manager.SaveFiles()]: ", err)
+			}
+		}
+	}
 }

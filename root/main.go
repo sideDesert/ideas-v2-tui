@@ -1,9 +1,6 @@
 package root
 
 import (
-	"encoding/json"
-	"os"
-
 	"sideDesert/ideasv2/components"
 	"sideDesert/ideasv2/keymap"
 
@@ -23,13 +20,9 @@ func InitialModel() model {
 		"Books",
 	}
 
-	var ideas []Idea
-	var books []Book
-	var projects []Project
-
-	loadData("ideas.json", &ideas)
-	loadData("books.json", &books)
-	loadData("projects.json", &projects)
+	ideas := loadIdeaData()
+	books := loadBookData()
+	projects := loadProjectData()
 
 	const defaultWidth = 20
 
@@ -64,6 +57,7 @@ func InitialModel() model {
 		Tabs:      components.NewTabModel(tabs, []string{"", ""}, 0),
 		IdeaManager: Manager{
 			tabIndex:     ideasTab,
+			DirPath:      ideasFolder,
 			List:         ideasList,
 			ListDelegate: ideaDelegate,
 			Form:         NewIdeasForm(),
@@ -71,6 +65,7 @@ func InitialModel() model {
 		},
 		ProjectManager: Manager{
 			tabIndex:     projectsTab,
+			DirPath:      projectsFolder,
 			List:         projectsList,
 			ListDelegate: projectDelegate,
 			Form:         NewForm("New Project"),
@@ -78,6 +73,7 @@ func InitialModel() model {
 		},
 		BookManager: Manager{
 			tabIndex:     booksTab,
+			DirPath:      booksFolder,
 			List:         booksList,
 			ListDelegate: bookDelegate,
 			Form:         NewBooksForm(),
@@ -106,25 +102,4 @@ func (m model) Init() tea.Cmd {
 	cmds = append(cmds, cmd)
 
 	return tea.Batch(cmds...)
-}
-
-func (m *model) SaveFiles() {
-	data, err := json.MarshalIndent(m.IdeaManager.List.Items(), "", " ")
-	if err != nil {
-		panic("Couldn't marshall the ideas into json")
-	}
-	writeToFile(data, "ideas.json")
-
-	data, err = json.MarshalIndent(m.BookManager.List.Items(), "", " ")
-	if err != nil {
-		panic("Couldn't marshall the ideas into json")
-	}
-	writeToFile(data, "books.json")
-}
-
-func writeToFile(data []byte, filepath string) {
-	err := os.WriteFile(filepath, data, os.FileMode(os.O_WRONLY))
-	if err != nil {
-		panic("Couldn't write to ideas.json")
-	}
 }

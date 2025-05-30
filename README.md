@@ -76,15 +76,16 @@ Both are automatically updated as you use the app.
 - [Charmbracelet Lip Gloss](https://github.com/charmbracelet/lipgloss)
 
 ## TODO
-- [ ] Make Forms use up same width and height adjustments
-- [ ] Make Form for projects
-- [ ] Add Upgrade to project button
-- [ ] Move documents from using .JSON files to using
+- [x] Make Forms use up same width and height adjustments
+- [x] Make Form for projects
+- [x] Move documents from using .JSON files to using normal files
 - [ ] Add Command to Open Document in NVIM
+- [ ] Add Upgrade to project button
 - [ ] Iterate on Project View design
 - [ ] Add keybind for moving items up and down
 - [ ] Add Line number and other beautification aspects to the markdown renderer
 - [ ] Replace huh with custom forms (I don't like how the keys are being handled)
+- [ ] Refine Help
 
 ---
 

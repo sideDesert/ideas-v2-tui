@@ -10,53 +10,25 @@ import (
 	"github.com/charmbracelet/huh"
 )
 
-type Idea struct {
+type ListItem struct {
 	TitleText       string `json:"title"`
+	FilePath        string `json:"file_path"`
 	DescriptionText string `json:"description"`
 }
 
-func (i Idea) Title() string {
+type Idea = ListItem
+type Book = ListItem
+type Project = ListItem
+
+func (i ListItem) Title() string {
 	return i.TitleText
 }
 
-func (i Idea) Description() string {
+func (i ListItem) Description() string {
 	return i.DescriptionText
 }
 
-func (i Idea) FilterValue() string {
-	return i.Title()
-}
-
-type Book struct {
-	TitleText       string `json:"title"`
-	DescriptionText string `json:"description"`
-}
-
-func (i Book) Title() string {
-	return i.TitleText
-}
-func (i Book) Description() string {
-	return i.DescriptionText
-}
-
-func (i Book) FilterValue() string {
-	return i.Title()
-}
-
-type Project struct {
-	TitleText       string `json:"title"`
-	DescriptionText string `json:"pomodoro"`
-}
-
-func (i Project) Title() string {
-	return i.TitleText
-}
-
-func (i Project) Description() string {
-	return i.DescriptionText
-}
-
-func (i Project) FilterValue() string {
+func (i ListItem) FilterValue() string {
 	return i.Title()
 }
 
@@ -68,6 +40,7 @@ type Tab struct {
 
 type Manager struct {
 	tabIndex     int
+	DirPath      string
 	List         list.Model
 	ListDelegate list.DefaultDelegate
 	Viewport     viewport.Model

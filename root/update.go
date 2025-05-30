@@ -27,7 +27,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ideasTab:
 			cmd, state := m.IdeaManager.HandleUpdateForm(msg)
 			if state == SaveAndExit {
-				m.SaveFiles()
+				m.IdeaManager.SaveLatestFile()
 				m.mode = Read
 			}
 			if state == Exit {
@@ -39,7 +39,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case projectsTab:
 			cmd, state := m.ProjectManager.HandleUpdateForm(msg)
 			if state == SaveAndExit {
-				m.SaveFiles()
+				m.ProjectManager.SaveLatestFile()
 				m.mode = Read
 			}
 			if state == Exit {
@@ -51,7 +51,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case booksTab:
 			cmd, state := m.BookManager.HandleUpdateForm(msg)
 			if state == SaveAndExit {
-				m.SaveFiles()
+				m.BookManager.SaveLatestFile()
 				m.mode = Read
 			}
 			if state == Exit {
