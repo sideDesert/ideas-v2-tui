@@ -3,10 +3,7 @@ package root
 import (
 	"sideDesert/ideasv2/components"
 
-	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/huh"
 )
 
 const (
@@ -30,13 +27,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case 0:
 			cmd := m.HandleUpdateIdeaForm(msg)
 			cmds = append(cmds, cmd)
-
 		// Handle Book form updates
 		case 2:
 			cmd := m.HandleUpdateBookForm(msg)
 			cmds = append(cmds, cmd)
 		}
-
 		return m, tea.Batch(cmds...)
 	}
 
@@ -44,6 +39,58 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	tabsModel, cmd := m.Tabs.Update(msg)
 	cmds = append(cmds, cmd)
 
+	if tabModel, ok := tabsModel.(components.TabModel); ok {
+		m.Tabs = tabModel
+	}
+
+	tcmds := m.updateTabState(&msg)
+	cmds = append(cmds, tcmds...)
+
+	m, hcmds := m.handleKeyEvent(msg)
+	cmds = append(cmds, hcmds...)
+
+	m.updateStyles()
+
+	return m, tea.Batch(cmds...)
+}
+
+func (m *model) updateStyles() {
+	switch m.activePanel {
+	case 0:
+		m.IdeaManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.IdeaManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+		m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+
+		m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.BookManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+		m.BookManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+	case 1:
+		m.IdeaManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.IdeaManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.normalTitle
+		m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.normalDesc
+
+		m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.BookManager.ListDelegate.Styles.NormalTitle = m.theme.list.normalTitle
+		m.BookManager.ListDelegate.Styles.NormalDesc = m.theme.list.normalDesc
+	case 2:
+		m.IdeaManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.IdeaManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.IdeaManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+		m.IdeaManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+
+		m.BookManager.ListDelegate.Styles.SelectedTitle = m.theme.list.selectedTitle
+		m.BookManager.ListDelegate.Styles.SelectedDesc = m.theme.list.selectedDesc
+		m.BookManager.ListDelegate.Styles.NormalTitle = m.theme.list.blurTitle
+		m.BookManager.ListDelegate.Styles.NormalDesc = m.theme.list.blurDesc
+	}
+}
+
+func (m *model) updateTabState(msg *tea.Msg) []tea.Cmd {
+	cmds := make([]tea.Cmd, 0)
 	switch m.Tabs.ActiveTab {
 	case 0:
 		ideaViewportModel, cmd := m.IdeaManager.Viewport.Update(msg)
@@ -74,114 +121,5 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	m.Tabs = tabsModel.(components.TabModel)
-
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-
-	case tea.KeyMsg:
-		m.Tabs.Update(msg)
-		isFilterNotInFocus := m.mode == Read &&
-			m.IdeaManager.List.FilterState() != list.Filtering &&
-			m.BookManager.List.FilterState() != list.Filtering
-
-		switch {
-		case key.Matches(msg, m.keys.Down):
-			n := len(m.Tabs.Tabs)
-			if m.activePanel == 0 && m.mode == Read {
-				m.Tabs.ActiveTab = (m.Tabs.ActiveTab + 1) % n
-			}
-
-		case key.Matches(msg, m.keys.Up):
-			n := len(m.Tabs.Tabs)
-			if m.activePanel == 0 && m.mode == Read {
-				if m.Tabs.ActiveTab == 0 {
-					m.Tabs.ActiveTab = n - 1
-				} else {
-					m.Tabs.ActiveTab = (m.Tabs.ActiveTab - 1)
-				}
-			}
-
-		case key.Matches(msg, m.keys.DeleteItem):
-			if m.mode == Read && m.activePanel == titlesPanel && isFilterNotInFocus {
-				switch m.Tabs.ActiveTab {
-				case 0:
-					i := m.IdeaManager.List.Index()
-					m.IdeaManager.List.RemoveItem(i)
-					m.IsTouched = true
-				case 2:
-					i := m.BookManager.List.Index()
-					m.BookManager.List.RemoveItem(i)
-					m.IsTouched = true
-				}
-			}
-
-		case key.Matches(msg, m.keys.Help):
-			if m.mode == Read {
-				m.help.ShowAll = !m.help.ShowAll
-			}
-
-		case key.Matches(msg, m.keys.AddMode) && m.activePanel == titlesPanel:
-			if isFilterNotInFocus {
-				m.mode = Write
-				switch m.Tabs.ActiveTab {
-				case 0:
-					m.IdeaManager.Form = NewIdeasForm()
-					return m, m.IdeaManager.Form.Init()
-				case 2:
-					m.BookManager.Form = NewBooksForm()
-					return m, m.BookManager.Form.Init()
-				case 4:
-					return m, m.BookManager.Form.Init()
-				default:
-					return m, nil
-				}
-			}
-
-		case key.Matches(msg, m.keys.EditMode):
-			if m.mode == Read && m.IdeaManager.List.FilterState() != list.Filtering {
-				m.mode = Edit
-				return m, nil
-			}
-
-		case key.Matches(msg, m.keys.ReadMode):
-			m.mode = Read
-			m.activePanel = 1
-			return m, nil
-
-		case key.Matches(msg, m.keys.NextPanel):
-			m.activePanel = (m.activePanel + 1) % m.n_panels
-
-		case key.Matches(msg, m.keys.PrevPanel):
-			if m.activePanel == 0 {
-				m.activePanel = 2
-			} else {
-				m.activePanel -= 1
-			}
-
-		case key.Matches(msg, m.keys.Quit):
-			if isFilterNotInFocus {
-				m.quitting = true
-				if m.IsTouched {
-					save := false
-					huh.
-						NewConfirm().
-						Title("Save Changes?").
-						Affirmative("Yes").
-						Negative("No").
-						Value(&save).
-						Run()
-
-					if save {
-						m.SaveFiles()
-					}
-				}
-				return m, tea.Quit
-			}
-		}
-	}
-
-	return m, tea.Batch(cmds...)
+	return cmds
 }

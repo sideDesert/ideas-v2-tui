@@ -6,5 +6,9 @@
  {
   "title": "Concurrency in Go",
   "description": "A book to learn about concurrency in GO!!"
+ },
+ {
+  "title": "some other book",
+  "description": "i like books"
  }
 ]
