@@ -21,3 +21,22 @@ func NewIdeasForm() *huh.Form {
 func NewBooksForm() *huh.Form {
 	return NewForm("Book Title")
 }
+
+func NewProjectsForm() *huh.Form {
+	return NewForm("Project Title")
+}
+
+func (m *model) NewTabForm() *huh.Form {
+	activeTab := m.Tabs.ActiveTab
+
+	if activeTab == ideasTab {
+		return NewIdeasForm()
+	}
+	if activeTab == booksTab {
+		return NewBooksForm()
+	}
+	if activeTab == projectsTab {
+		return NewProjectsForm()
+	}
+	return nil
+}

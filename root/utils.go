@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -46,6 +47,18 @@ func loadBookData() []Book {
 		books = append(books, i)
 	}
 	return books
+}
+
+func (m *model) getManager() *Manager {
+	switch m.Tabs.ActiveTab {
+	case ideasTab:
+		return &m.IdeaManager
+	case projectsTab:
+		return &m.ProjectManager
+	case booksTab:
+		return &m.BookManager
+	}
+	panic("Error[*model.getManager]: activeTab case is not handled")
 }
 
 func loadIdeaData() []Idea {
@@ -128,4 +141,30 @@ func get_mode(mode int) string {
 	} else {
 		return "U"
 	}
+}
+
+func ensureDirExists(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return os.MkdirAll(path, 0755) // create with parents if needed
+	}
+	return nil // directory already exists
+}
+
+func ensureDirsExist() {
+	folders := []string{ideasFolder, projectsFolder, booksFolder}
+	for _, folder := range folders {
+		ensureDirExists(folder)
+	}
+}
+
+func editorCmd(filePath string) *exec.Cmd {
+	if editor == "" {
+		editor = "nvim" // fallback
+	}
+	cmd := exec.Command(editor, filePath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd
 }

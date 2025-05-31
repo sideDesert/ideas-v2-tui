@@ -11,9 +11,10 @@ const (
 )
 
 const (
-	Read  = iota
-	Write = iota
-	Edit  = iota
+	Read = iota
+	Write
+	Edit
+	Delete
 )
 
 var (
@@ -22,4 +23,5 @@ var (
 	ideasFolder    = filepath.Join(folderPath, "ideas")
 	booksFolder    = filepath.Join(folderPath, "books")
 	projectsFolder = filepath.Join(folderPath, "projects")
+	editor         = "nvim"
 )

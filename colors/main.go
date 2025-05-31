@@ -5,6 +5,7 @@ const (
 	DarkPurple        = "#7D56F4"
 	Green             = "#31E183"
 	DarkGreen         = "#28bd6d"
+	DarkestGreen      = "#527251"
 	Pink              = "#FF75B7"
 	Grey              = "#626262"
 	DarkGrey          = "#3A3A3A"
@@ -17,4 +18,5 @@ const (
 	ActiveSubduedText = "#64708D"
 	InactiveTab       = "#262626"
 	InactiveText      = "#5C5C5C"
+	Red               = "#A46060"
 )

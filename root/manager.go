@@ -6,6 +6,7 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/huh"
 )
 
@@ -79,4 +80,57 @@ func (m *Manager) SaveLatestFile() {
 			}
 		}
 	}
+}
+
+func (m *Manager) RemoveItem(index int) {
+	n := len(m.List.Items())
+	if index >= n {
+		return
+	}
+	if item, ok := m.List.Items()[index].(ListItem); ok {
+		fp := item.FilePath
+		if err := os.Remove(fp); err != nil {
+			log.Println("Error[*Manager.RemoveItem]: Could not delete file ", fp, err)
+		}
+		m.List.RemoveItem(index)
+	}
+}
+
+func (m *Manager) GetActiveFilepath() string {
+	n := len(m.List.Items())
+	if n == 0 {
+		return ""
+	}
+
+	if item, ok := m.List.Items()[m.List.Index()].(ListItem); ok {
+		return item.FilePath
+	}
+
+	return ""
+}
+
+func (m *model) editDescription() tea.Cmd {
+	return tea.ExecProcess(editorCmd(m.getManager().GetActiveFilepath()), nil)
+}
+
+func (m *Manager) GetActiveListItem() *ListItem {
+	list := m.List
+	n := len(list.Items())
+	index := list.Index()
+	if n == 0 {
+		return nil
+	}
+	if listItem, ok := list.Items()[index].(ListItem); ok {
+		return &listItem
+	}
+	return nil
+}
+
+func (m *Manager) SetViewportContent(content string) {
+	out, err := glamour.Render(content, "dark")
+	if err != nil {
+		fmt.Println("Error[*Manager.SetViewportContent]:", err)
+		return
+	}
+	m.Viewport.SetContent(out)
 }

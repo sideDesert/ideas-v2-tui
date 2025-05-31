@@ -4,8 +4,6 @@ import (
 	"sideDesert/ideasv2/colors"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -22,7 +20,7 @@ func (m model) View() string {
 	titleHeight := 1
 	tabContentHeight := m.height - marginTop - footerHeight - titleHeight
 
-	tabsPanelWidth := m.width / 6
+	tabsPanelWidth := m.width / 7
 	titlePanelWidth := (m.width - tabsPanelWidth) / 3
 	formWidth := m.width / 2
 	descPanelWidth := m.width - tabsPanelWidth - titlePanelWidth
@@ -52,12 +50,21 @@ func (m model) View() string {
 			return centeredPanel.Render(form)
 		}
 
-	case Read, Edit:
+	case Read, Edit, Delete:
 		// var tabStyle = lipgloss.NewStyle().
 		// 	Margin(0).
 		// 	Padding(0)
+		listPanelTitle := "Titles"
+		viewportPanelTitle := "Description"
+		list := m.getManager().List.Items()
+		index := m.getManager().List.Index()
+		if len(list) != 0 {
+			if l, ok := list[index].(ListItem); ok {
+				viewportPanelTitle = l.Title()
+			}
+		}
 
-		// var footerStyle = lipgloss.NewStyle()
+		var footerStyle = lipgloss.NewStyle()
 
 		var titleStyle = lipgloss.
 			NewStyle().
@@ -71,6 +78,10 @@ func (m model) View() string {
 		var inactiveTitleStyle = titleStyle.
 			Background(lipgloss.Color(colors.InactiveTab)).
 			Foreground(lipgloss.Color(colors.InactiveText))
+
+		var destructiveTitleStyle = titleStyle.
+			Background(lipgloss.Color(colors.Red)).
+			Foreground(lipgloss.Color(colors.White))
 
 		var contentStyle = lipgloss.NewStyle().Padding(1, 0, 0, 1)
 
@@ -96,12 +107,17 @@ func (m model) View() string {
 		}
 
 		switch m.activePanel {
-		case 0:
+		case tabsPanel:
 			tabsTitleStyle = activeTitleStyle
 		case 1:
 			titlesTitleStyle = activeTitleStyle
 		case 2:
-			descriptionTitleStyle = activeTitleStyle
+			descriptionTitleStyle = activeTitleStyle.Background(lipgloss.Color(colors.DarkestGreen))
+		}
+
+		if m.mode == Delete {
+			listPanelTitle = "Delete? (Y/N)"
+			titlesTitleStyle = destructiveTitleStyle
 		}
 
 		tabsTitleStyle = tabsTitleStyle.Width(tabsPanelWidth).Height(1)
@@ -120,19 +136,19 @@ func (m model) View() string {
 
 		listView := &activeMger.List
 		viewportView := &activeMger.Viewport
-		activeIndex := activeMger.List.Index()
+		// activeIndex := activeMger.List.Index()
 
-		if len(listView.Items()) != 0 {
-			activeItem := &listView.Items()[activeIndex]
-			if a, ok := (*activeItem).(Idea); ok {
-				out, err := glamour.Render(a.Description(), "dark")
-				if err != nil {
-					tea.Println("Glamour Render error, ", err)
-				}
-				viewportView.SetContent(out)
-			}
-			listView.SetDelegate(m.IdeaManager.ListDelegate)
-		}
+		// if len(listView.Items()) != 0 {
+		// 	activeItem := &listView.Items()[activeIndex]
+		// 	if a, ok := (*activeItem).(Idea); ok {
+		// 		out, err := glamour.Render(a.Description(), "dark")
+		// 		if err != nil {
+		// 			tea.Println("Glamour Render error, ", err)
+		// 		}
+		// 		viewportView.SetContent(out)
+		// 	}
+		// }
+		listView.SetDelegate(m.IdeaManager.ListDelegate)
 
 		listView.SetHeight(tabContentHeight)
 		listView.SetWidth(titlePanelWidth)
@@ -155,26 +171,18 @@ func (m model) View() string {
 				lipgloss.JoinVertical(
 					lipgloss.Top,
 					titlesTitleStyle.
-						Render("Titles"),
+						Render(listPanelTitle),
 					listView.View(),
 				),
 				lipgloss.JoinVertical(
 					lipgloss.Top,
 					descriptionTitleStyle.
-						Render("Description"),
+						Render(viewportPanelTitle),
 					viewportView.View(),
 				),
 			),
 
-			m.help.View(m.keys),
-
-			// footerStyle.Render(tabStyle.
-			// 	Width(m.width).
-			// 	MarginTop(1).
-			// 	Height(footerHeight).
-			// 	Background(lipgloss.Color("60")).
-			// 	PaddingLeft(1).
-			// 	Render(fmt.Sprintf("STATUS  Active Panel: %d Mode: %s", m.activePanel, get_mode(m.mode)))),
+			footerStyle.MarginTop(1).Render(m.help.View(m.keys)),
 		)
 
 	}

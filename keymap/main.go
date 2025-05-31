@@ -24,13 +24,16 @@ type KeyMap struct {
 	Help   key.Binding
 	Submit key.Binding
 	Quit   key.Binding
+
+	Confirm key.Binding
+	Cancel  key.Binding
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.Left, k.Right}, // first column
-		{k.Help, k.Quit, k.Submit},      // second column
-		{k.DeleteItem, k.RenameItem, k.EditItem, k.PrevPanel},
+		{k.DeleteItem, k.RenameItem, k.EditItem},
+		{k.Up, k.Down},             // first column
+		{k.Help, k.Quit, k.Submit}, // second column
 		{k.NextTab, k.PrevTab, k.NextPanel, k.PrevPanel},
 	}
 }
@@ -47,14 +50,6 @@ var Keys = KeyMap{
 		key.WithKeys("down", "j"),
 		key.WithHelp("↓/j", "move down"),
 	),
-	Left: key.NewBinding(
-		key.WithKeys("left", "h"),
-		key.WithHelp("←/h", "move left"),
-	),
-	Right: key.NewBinding(
-		key.WithKeys("right", "l"),
-		key.WithHelp("→/l", "move right"),
-	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),
 		key.WithHelp("?", "toggle help"),
@@ -69,23 +64,23 @@ var Keys = KeyMap{
 	),
 	NextTab: key.NewBinding(
 		key.WithKeys("J", "ctrl+tab"),
-		key.WithHelp("shift+j", "Shift to right tab"),
+		key.WithHelp("J", "Shift to right tab"),
 	),
 	PrevTab: key.NewBinding(
 		key.WithKeys("K", "ctrl+shift+tab"),
-		key.WithHelp("shift+k", "Shift to left tab"),
+		key.WithHelp("K", "Shift to left tab"),
 	),
 	NextPanel: key.NewBinding(
 		key.WithKeys("L"),
-		key.WithHelp("shift+l", "Shift to right tab"),
+		key.WithHelp("L/→", "Shift to right tab"),
 	),
 	PrevPanel: key.NewBinding(
 		key.WithKeys("H"),
-		key.WithHelp("shift+h", "Shift to left tab"),
+		key.WithHelp("H/←", "Shift to left tab"),
 	),
 	AddMode: key.NewBinding(
 		key.WithKeys("a", "i", "A", "I"),
-		key.WithHelp("a", "Append/Add mode"),
+		key.WithHelp("a/i", "Append/Add mode"),
 	),
 	EditMode: key.NewBinding(
 		key.WithKeys("c", "e"),
@@ -96,7 +91,15 @@ var Keys = KeyMap{
 		key.WithHelp("esc", "Read mode"),
 	),
 	DeleteItem: key.NewBinding(
-		key.WithKeys("d", "D"),
-		key.WithHelp("d", "Delete Item"),
+		key.WithKeys("x", "D"),
+		key.WithHelp("x/D", "Delete Item"),
+	),
+	Confirm: key.NewBinding(
+		key.WithKeys("y", "Y"),
+		key.WithHelp("y", "Confirm"),
+	),
+	Cancel: key.NewBinding(
+		key.WithKeys("n", "N"),
+		key.WithHelp("n", "Cancel"),
 	),
 }

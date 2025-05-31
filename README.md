@@ -79,13 +79,16 @@ Both are automatically updated as you use the app.
 - [x] Make Forms use up same width and height adjustments
 - [x] Make Form for projects
 - [x] Move documents from using .JSON files to using normal files
-- [ ] Add Command to Open Document in NVIM
-- [ ] Add Upgrade to project button
+- [x] Add Command to Open Document in NVIM
+- [x] Update description after changes
+- [x] Fix Delete button
+- [x] Add Scroll view
+- [ ] Add Rename Option
 - [ ] Iterate on Project View design
-- [ ] Add keybind for moving items up and down
+- [ ] Add Upgrade to project button
 - [ ] Add Line number and other beautification aspects to the markdown renderer
 - [ ] Replace huh with custom forms (I don't like how the keys are being handled)
-- [ ] Refine Help
+- [x] Refine Help
 
 ---
 

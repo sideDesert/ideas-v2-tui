@@ -13,25 +13,21 @@ const (
 	booksTab    = 2
 )
 
-func (m model) handleKeyEvent(msg tea.Msg) (model, []tea.Cmd) {
+func (m model) handleKeyEvent(msg tea.Msg) (model, tea.Cmd) {
 	cmds := make([]tea.Cmd, 0)
-	if m.Tabs.ActiveTab == ideasTab && m.activePanel == 1 {
-		lm, cmd := m.IdeaManager.List.Update(msg)
-		m.IdeaManager.List = lm
+
+	if m.activePanel == listPanel {
+		lm, cmd := m.getManager().List.Update(msg)
+		m.getManager().List = lm
 		cmds = append(cmds, cmd)
 	}
 
-	if m.Tabs.ActiveTab == projectsTab && m.activePanel == 1 {
-		lm, cmd := m.ProjectManager.List.Update(msg)
-		m.ProjectManager.List = lm
-		cmds = append(cmds, cmd)
-	}
+	if m.activePanel == viewportPanel {
+		lm, cmd := m.getManager().Viewport.Update(msg)
+		lm.Height = m.height - 3
+		m.getManager().Viewport = lm
 
-	if m.Tabs.ActiveTab == booksTab && m.activePanel == 1 {
-		lm, cmd := m.BookManager.List.Update(msg)
-		m.BookManager.List = lm
 		cmds = append(cmds, cmd)
-
 	}
 
 	switch msg := msg.(type) {
@@ -47,34 +43,39 @@ func (m model) handleKeyEvent(msg tea.Msg) (model, []tea.Cmd) {
 		switch {
 		case key.Matches(msg, m.keys.Down):
 			n := len(m.Tabs.Tabs)
-			if m.activePanel == 0 && m.mode == Read {
+			if m.activePanel == tabsPanel && m.mode == Read {
 				m.Tabs.ActiveTab = (m.Tabs.ActiveTab + 1) % n
+			}
+
+			if m.activePanel == listPanel && m.mode == Read {
+				li := m.getManager().GetActiveListItem()
+				if li != nil {
+					m.getManager().SetViewportContent(li.Description())
+				}
 			}
 			return m, nil
 
 		case key.Matches(msg, m.keys.Up):
 			n := len(m.Tabs.Tabs)
-			if m.activePanel == 0 && m.mode == Read {
+			if m.activePanel == tabsPanel && m.mode == Read {
 				if m.Tabs.ActiveTab == 0 {
 					m.Tabs.ActiveTab = n - 1
 				} else {
 					m.Tabs.ActiveTab = (m.Tabs.ActiveTab - 1)
 				}
 			}
+
+			li := m.getManager().GetActiveListItem()
+			if li != nil {
+				m.getManager().SetViewportContent(li.Description())
+			}
+
+			// }
 			return m, nil
 
 		case key.Matches(msg, m.keys.DeleteItem):
-			if m.mode == Read && m.activePanel == titlesPanel && isFilterNotInFocus {
-				switch m.Tabs.ActiveTab {
-				case 0:
-					i := m.IdeaManager.List.Index()
-					m.IdeaManager.List.RemoveItem(i)
-					m.IsTouched = true
-				case 2:
-					i := m.BookManager.List.Index()
-					m.BookManager.List.RemoveItem(i)
-					m.IsTouched = true
-				}
+			if m.mode == Read && m.activePanel == listPanel && isFilterNotInFocus {
+				m.mode = Delete
 			}
 
 		case key.Matches(msg, m.keys.Help):
@@ -82,29 +83,18 @@ func (m model) handleKeyEvent(msg tea.Msg) (model, []tea.Cmd) {
 				m.help.ShowAll = !m.help.ShowAll
 			}
 
-		case key.Matches(msg, m.keys.AddMode) && m.activePanel == titlesPanel:
+		case key.Matches(msg, m.keys.AddMode) && m.activePanel == listPanel:
 			if isFilterNotInFocus {
 				m.mode = Write
-				switch m.Tabs.ActiveTab {
-				case 0:
-					m.IdeaManager.Form = NewIdeasForm()
-					cmds = append(cmds, m.IdeaManager.Form.Init())
-					return m, cmds
-				case 2:
-					m.BookManager.Form = NewBooksForm()
-					cmds = append(cmds, m.BookManager.Form.Init())
-					return m, cmds
-				case 4:
-					cmds = append(cmds, m.BookManager.Form.Init())
-					return m, cmds
-				default:
-					return m, nil
-				}
+				m.getManager().Form = m.NewTabForm()
+				cmds = append(cmds, m.getManager().Form.Init())
+				return m, tea.Batch(cmds...)
 			}
 
 		case key.Matches(msg, m.keys.EditMode):
-			if m.mode == Read && m.IdeaManager.List.FilterState() != list.Filtering {
+			if m.mode == Read && isFilterNotInFocus {
 				m.mode = Edit
+				return m, m.editDescription()
 			}
 
 		case key.Matches(msg, m.keys.ReadMode):
@@ -141,9 +131,20 @@ func (m model) handleKeyEvent(msg tea.Msg) (model, []tea.Cmd) {
 					}
 				}
 				cmds = append(cmds, tea.Quit)
-				return m, cmds
+				return m, tea.Batch(cmds...)
+			}
+		case key.Matches(msg, m.keys.Confirm):
+			if m.mode == Delete {
+				index := m.getManager().List.Index()
+				m.getManager().RemoveItem(index)
+				m.mode = Read
+			}
+		case key.Matches(msg, m.keys.Cancel):
+			if m.mode == Delete {
+				m.mode = Read
 			}
 		}
+
 	}
-	return m, cmds
+	return m, tea.Batch(cmds...)
 }

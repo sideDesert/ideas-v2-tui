@@ -1,6 +1,7 @@
 package root
 
 import (
+	"fmt"
 	"sideDesert/ideasv2/components"
 	"sideDesert/ideasv2/keymap"
 
@@ -8,12 +9,44 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 )
 
 // Change this
 type item string
 
+func (m *model) reloadListData() tea.Cmd {
+	data := m.getCurrentListData()
+	if data == nil {
+		fmt.Println("Error[*model.reloadListData]: Couldn't Load data")
+		return nil
+	}
+
+	items := []list.Item{}
+	for _, i := range data {
+		items = append(items, i)
+	}
+
+	cmd := m.getManager().List.SetItems(items)
+	return cmd
+}
+
+func (m *model) getCurrentListData() []ListItem {
+	if m.Tabs.ActiveTab == ideasTab {
+		return loadIdeaData()
+	}
+	if m.Tabs.ActiveTab == projectsTab {
+		return loadProjectData()
+	}
+	if m.Tabs.ActiveTab == booksTab {
+		return loadBookData()
+	}
+
+	return nil
+}
+
 func InitialModel() model {
+	ensureDirsExist()
 	tabs := []string{
 		"Ideas",
 		"Projects",
@@ -48,20 +81,44 @@ func InitialModel() model {
 	projectDelegate := list.NewDefaultDelegate()
 	projectsList := NewList(items, projectDelegate)
 
+	ideavp := viewport.New(0, 0)
+	if len(ideas) != 0 {
+		content, err := glamour.Render(ideas[0].Description(), "dark")
+		if err == nil {
+			ideavp.SetContent(content)
+		}
+	}
+
+	projvp := viewport.New(0, 0)
+	if len(projects) != 0 {
+		content, err := glamour.Render(projects[0].Description(), "dark")
+		if err == nil {
+			projvp.SetContent(content)
+		}
+	}
+
+	bookvp := viewport.New(0, 0)
+	if len(books) != 0 {
+		content, err := glamour.Render(books[0].Description(), "dark")
+		if err == nil {
+			bookvp.SetContent(content)
+		}
+	}
 	m := model{
-		keys:      keymap.Keys,
-		IsTouched: false,
-		n_panels:  3,
-		help:      help.New(),
-		theme:     DefaultTheme(),
-		Tabs:      components.NewTabModel(tabs, []string{"", ""}, 0),
+		keys:        keymap.Keys,
+		IsTouched:   false,
+		activePanel: 1,
+		n_panels:    3,
+		help:        help.New(),
+		theme:       DefaultTheme(),
+		Tabs:        components.NewTabModel(tabs, []string{"", ""}, 0),
 		IdeaManager: Manager{
 			tabIndex:     ideasTab,
 			DirPath:      ideasFolder,
 			List:         ideasList,
 			ListDelegate: ideaDelegate,
 			Form:         NewIdeasForm(),
-			Viewport:     viewport.New(0, 0),
+			Viewport:     ideavp,
 		},
 		ProjectManager: Manager{
 			tabIndex:     projectsTab,
@@ -69,7 +126,7 @@ func InitialModel() model {
 			List:         projectsList,
 			ListDelegate: projectDelegate,
 			Form:         NewForm("New Project"),
-			Viewport:     viewport.New(0, 0),
+			Viewport:     projvp,
 		},
 		BookManager: Manager{
 			tabIndex:     booksTab,
@@ -77,7 +134,7 @@ func InitialModel() model {
 			List:         booksList,
 			ListDelegate: bookDelegate,
 			Form:         NewBooksForm(),
-			Viewport:     viewport.New(0, 0),
+			Viewport:     bookvp,
 		},
 	}
 
